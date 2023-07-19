@@ -19,6 +19,15 @@ export type BoxType = 'user' | 'place' | 'ground' | 'wall' | 'door';
 export const GROUND_BOX = ['user', 'place', 'ground'];
 export const OBSTACLE_BOX = ['wall', 'door'];
 
+const COLOR_BY_TYPE = {
+        'user': 'green',
+        'place': 'red',
+        'ground': 'white',
+        'wall': 'black',
+        'door': '#6F4E37', // brown
+    }
+
+
 export class Box {
     x!: number;
     y!: number;
@@ -27,19 +36,12 @@ export class Box {
     kindOption!: KindOption;
     neighbors!: Array<Box>;
 
-    COLOR_BY_TYPE = {
-        'user': 'green',
-        'place': 'red',
-        'ground': 'white',
-        'wall': 'black',
-        'door': '#6F4E37', // brown
-    }
-
+   
     constructor(x: number, y: number, type: BoxType, matrix: Matrix) {
         this.x = x;
         this.y = y;
         this.type = type;
-        this.color = this.COLOR_BY_TYPE[type];;
+        this.color = COLOR_BY_TYPE[type];;
         this.neighbors = [];
         
         let {columns, rows} = matrix;
@@ -66,6 +68,8 @@ export class Box {
                 { x: this.x - 1, y: this.y }, // izquierda
                 { x: this.x + 1, y: this.y }, // derecha
                 { x: this.x, y: this.y + 1 }, // abajo
+                { x: this.x - 1, y: this.y+1 }, // esquina inferior izquierda
+                { x: this.x + 1, y: this.y+1 }, // esquina inferior derecha
             ],
             'top-right-corner': [ // x = columns-1, y = 0
                 { x: this.x, y: this.y + 1 }, // abajo
@@ -76,17 +80,25 @@ export class Box {
                 { x: this.x, y: this.y - 1 }, // arriba 
                 { x: this.x, y: this.y + 1 }, // abajo
                 { x: this.x + 1, y: this.y }, // derecha
+                { x: this.x + 1, y: this.y - 1 }, // esquina superior derecha
+                { x: this.x + 1, y: this.y+1 }, // esquina inferior derecha
             ],
             'body': [
                 { x: this.x, y: this.y - 1 }, // arriba
                 { x: this.x, y: this.y + 1 }, // abajo
                 { x: this.x - 1, y: this.y }, // izquieda
                 { x: this.x + 1, y: this.y }, // derecha
+                { x: this.x + 1, y: this.y - 1 }, // esquina superior derecha
+                { x: this.x + 1, y: this.y + 1 }, // esquina inferior derecha
+                { x: this.x - 1, y: this.y + 1 }, // esquina inferior izquierda
+                { x: this.x - 1, y: this.y - 1 }, // esquina superior izquierda 
             ],
             'right': [
                 { x: this.x, y: this.y - 1 }, // arriba
                 { x: this.x, y: this.y + 1 }, // abajo
                 { x: this.x - 1, y: this.y }, // izquierda
+                { x: this.x - 1, y: this.y - 1 }, // esquina superior izquierda 
+                { x: this.x - 1, y: this.y + 1 }, // esquina inferior izquierda
             ],
             'bottom-left-corner': [ // x = 0, y = rows-1
                 { x: this.x, y: this.y - 1 }, // arriba
@@ -97,6 +109,8 @@ export class Box {
                 { x: this.x - 1, y: this.y }, // izquierda
                 { x: this.x + 1, y: this.y }, // derecha
                 { x: this.x, y: this.y - 1 }, // arriba
+                { x: this.x + 1, y: this.y - 1 }, // esquina superior derecha
+                { x: this.x - 1, y: this.y - 1 }, // esquina superior izquierda 
             ],
             'bottom-right-corner': [ // x = columns-1, y = rows-1
                 { x: this.x, y: this.y - 1 }, // arriba
@@ -109,28 +123,3 @@ export class Box {
         COOR_OPTIONS[this.kindOption].forEach(coor => this.neighbors.push(stage[coor.x][coor.y]));
     }
 }
-
-// export type GroundType = 'user' | 'place' | 'road';
-
-// export class Ground extends Box {
-//     contain!: GroundType;
-
-//     constructor(x: number, y: number, matrix: Matrix, contain: GroundType = 'road') {
-//         let color = contain === 'road' ? '#fff' : contain === 'user' ? 'green' : 'red';
-//         super(x, y, color, matrix);
-//         this.contain = contain;
-//     }
-
-// }
-
-// export type ObstacleType = 'wall' | 'door';
-
-// export class Obstacle extends Box {
-//     type!: ObstacleType;
-
-//     constructor(x: number, y: number, matrix: Matrix, type: ObstacleType) {
-//         let color = type === 'wall' ? '#000' : '#6F4E37';
-//         super(x, y, color, matrix);
-//         this.type = type;
-//     }
-// }

@@ -1,4 +1,4 @@
-import { Box, BoxType, GROUND_BOX, OBSTACLE_BOX } from './boxes';
+import { Box, BoxType, GROUND_BOX } from './boxes';
 
 export class Editor {
 
@@ -64,7 +64,6 @@ export class Editor {
     }
 
     generateSamplePlane() {
-        console.log(this.rows)
         // wall top
         for (let c = 0; c < 30; c++) {
             this.stage[c][14] = new Box(c, 14, 'wall', { columns: this.columns, rows: this.rows });
@@ -156,10 +155,8 @@ export class Editor {
         // console.log("Los points", points);
 
         if (points.length < 2 || points.some(val => val === undefined)) {
-            console.log("->", points);
             return null;
         }
-        console.log(points);
 
         // init algoritm
         let [f, s] = points;
@@ -168,10 +165,7 @@ export class Editor {
         // this.stage.forEach(col => col.forEach(row => console.log({...row})));
 
         // console.log("STAGE antes de entrar al algoritmo: ", this.stage);
-        this.stage.forEach(c => c.forEach(r => {
-            if (r.type === 'user' || r.type === 'wall' || r.type === 'place')
-                console.log(r);
-        }))
+        
 
         if (f.type === 'user')
             // console.log("Start:", f,   "Goal: ", s);
@@ -186,8 +180,8 @@ export class Editor {
         clearInterval(this.animation);
 
         // clear canvas
-        this.drawLines(path, 'white');
-        console.log("start", path[0], "end", path[path.length - 1]);
+        this.drawLines(path, 'white', 5);
+        this.context.closePath();
 
         path.forEach(p => {
             this.context.clearRect(p?.x * this.widthTiles, p?.y * this.heightTiles, this.heightTiles, this.heightTiles)
@@ -203,10 +197,9 @@ export class Editor {
         // this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         // draw guide lines
         this.animation = setInterval(() => {
-            this.drawLines(path, '#1E9AFA');
+            this.drawLines(path, '#1E9AFA', 1);
             if (p >= path.length - 1) {
                 p = 0;  // repite animacion
-                console.log("entra")
             } else {
                 p++;
             }
@@ -219,22 +212,15 @@ export class Editor {
         }, 1000 / 10);
     }
 
-    drawLines(path: Box[], color: string) {
+    drawLines(path: Box[], color: string, lineWidth: number) {
         let ctx = this.context;
-
-        this.context.beginPath();
-        this.context.moveTo(0, 0);
-        this.context.lineTo(0, 4);
-        this.context.strokeStyle = 'brown';
-        this.context.lineWidth = 3;
-        this.context.stroke();
 
         let center = 4;
         ctx.beginPath();
         ctx.moveTo(path[0].x * this.widthTiles + center, path[0].y * this.heightTiles + center);
         ctx.lineTo(path[1].x * this.widthTiles + center, path[1].y * this.heightTiles + center);
         ctx.strokeStyle = color;
-        ctx.lineWidth = 3;
+        ctx.lineWidth = lineWidth;
         ctx.stroke();
         path.forEach((p, index) => {
             if (index > 0) {
@@ -242,7 +228,7 @@ export class Editor {
                 ctx.moveTo(path[index - 1].x * this.widthTiles + center, path[index - 1].y * this.heightTiles + center);
                 ctx.lineTo(path[index].x * this.widthTiles + center, path[index].y * this.heightTiles + center);
                 ctx.strokeStyle = color;
-                ctx.lineWidth = 3;
+                ctx.lineWidth = lineWidth;
                 ctx.stroke();
             }
         });
@@ -284,7 +270,6 @@ export class Editor {
     }
 
     async astart(start: Box, goal: Box): Promise<Box[] | null> {
-        console.log("ENTRA AL ALGORITMO");
         const openSet = [start];
         const cameFrom = new Map<Box, Box>();
         const gScore = new Map<Box, number>();
@@ -296,10 +281,8 @@ export class Editor {
         while (openSet.length > 0) { // while open set its not empty
             const current = this.getBoxWithLowestFScore(openSet, fScore);
 
-            console.log("VECINOS DE CURRENT: ", current.neighbors);
-
             if (current === goal) {
-                console.log("encontrado");
+                // console.log("encontrado");
                 return this.reconstructPath(cameFrom, current);
             }
 
@@ -308,17 +291,14 @@ export class Editor {
             for (let neighbor of current.neighbors) {
                 let box = this.findBox(neighbor.x, neighbor.y);
 
-                if (box?.type !== 'wall') {
+                if (box?.type !== 'wall') { // discard boxes for the tour
                     box?.addNeighbors(this.stage);
                     if (box?.type === 'place' || box?.type === 'user' || (!box?.neighbors.some(b => b.type === 'wall'))) {
                         const tentativeGScore = gScore.get(current) || 0 + this.heuristic(current, neighbor);
-                        console.log("el tentative score es ", neighbor, "->", tentativeGScore, " < ", gScore.get(neighbor), "no hay", !gScore.has(neighbor));
 
-                        // if (!gScore.has(neighbor) || tentativeGScore < (gScore.get(neighbor) || -1)) {
-                        if (tentativeGScore < (gScore.get(neighbor) || 0)) {
+                        if (!gScore.has(neighbor) || tentativeGScore < (gScore.get(neighbor) || -1)) {
 
                             cameFrom.set(neighbor, current);
-                            // console.log("Agregado a la ruta ->", neighbor, "valor de", current)
                             gScore.set(neighbor, tentativeGScore);
                             fScore.set(neighbor, tentativeGScore + this.heuristic(neighbor, goal)); // heuristic
 
@@ -331,7 +311,6 @@ export class Editor {
             }
         }
 
-        console.log("NO ENCONTRO NA", goal);
         return null;
     }
 

@@ -1,7 +1,7 @@
 import './style.css'
 
 import { Editor } from './editor';
-import { Box, BoxType, GROUND_BOX } from './boxes';
+import { Box, BoxType } from './boxes';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
@@ -35,7 +35,7 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
   const editor = new Editor(canvas);
 
   // console.log(editor.widthTiles, editor.heightTiles);
-  console.log(editor.stage)
+  // console.log(editor.stage)
 
   guide.style.width = `${canvas.width}px`;
   guide.style.height = `${canvas.height}px`;
@@ -117,7 +117,7 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
 
       if (path) {
         // draw 2D tour
-        path.forEach(g => console.log(`->${g.kindOption} (${g.x},${g.y}) es ${g.type}`))
+        // path.forEach(g => console.log(`->${g.kindOption} (${g.x},${g.y}) es ${g.type}`))
 
         editor.walkingThePath(path);
       } else {
@@ -126,13 +126,6 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
     });
 
     clearPathBtn.addEventListener('click', () => {
-      editor.context.beginPath();
-      editor.context.moveTo(0, 0);
-      editor.context.lineTo(1*editor.widthTiles, 1*editor.heightTiles);
-      editor.context.strokeStyle = 'brown';
-      editor.context.lineWidth = 3;
-      editor.context.stroke()
-
       if (path)
         editor.clearPath(path);
     });
