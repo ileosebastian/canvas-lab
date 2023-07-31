@@ -15,6 +15,29 @@ export class Editor {
     typeObstacle: string[] = ['wall', 'door'];
 
     animation: any;
+    imageLocation!: HTMLImageElement;
+    imageUser!: HTMLImageElement;
+    imgU0!: HTMLImageElement;
+    imgU45!: HTMLImageElement;
+    imgU90!: HTMLImageElement;
+    imgU135!: HTMLImageElement;
+    imgU180!: HTMLImageElement;
+    imgU225!: HTMLImageElement;
+    imgU270!: HTMLImageElement;
+    imgU315!: HTMLImageElement;
+    spritesUser!: Map<string, HTMLImageElement>;
+
+    routName: string[] = [
+        'user0',
+        'user45',
+        'user90',
+        'user135',
+        'user180',
+        'user225',
+        'user270',
+        'user315',
+    ];
+    imgFloor = new Image();
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
@@ -22,12 +45,32 @@ export class Editor {
         if (ctx)
             this.context = ctx;
 
+        this.imgFloor.src = `../floor-location.svg`;
         this.columns = this.canvas.width / 10;
         this.rows = this.canvas.height / 10;
 
         this.widthTiles = Math.floor(canvas.height / this.rows);
         this.heightTiles = Math.floor(canvas.height / this.rows);
 
+        let img;
+        this.spritesUser = new Map();
+
+        img = new Image();
+        img.src = `../public/user.svg`;
+        // img.width = this.widthTiles;
+        // img.height = this.heightTiles;
+        this.imageUser = img;
+
+        img = new Image();
+        img.src = `../public/location.svg`;
+        this.imageLocation = img;
+
+        this.routName.forEach(route => {
+            img = new Image(this.widthTiles, this.heightTiles);
+            img.src = `../public/${route}.svg`;
+
+            this.spritesUser.set(route, img);
+        });
         this.stage = this.create2DMatrix(this.rows, this.columns);
 
         // fill stage
@@ -103,6 +146,17 @@ export class Editor {
         this.context.fillRect(box.x * this.widthTiles, box.y * this.heightTiles, this.heightTiles, this.heightTiles);
     }
 
+    drawImg(box: Box) {
+        console.log("entra a funcion dibujar img")
+        try {
+            if (this.spritesUser.has('user0') && this.spritesUser.get('user0')) {
+                this.context.drawImage(this.spritesUser.get('user90') || this.imageUser, box.x * this.widthTiles, box.y * this.heightTiles, this.imageUser.width, this.imageUser.height);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     addBox(box: Box) {
         // replace box to obstacle
         this.stage[box.x][box.y] = box;
@@ -132,7 +186,14 @@ export class Editor {
 
             // add box
             this.addBox(newBox);
-            this.drawBox(newBox);
+            console.log("EL OBJETO ES", newBox)
+            if (newBox.type === 'user') {
+                console.log("entra")
+                this.drawImg(newBox);
+            } else {
+                console.log("entra como no user")
+                this.drawBox(newBox);
+            }
 
             return newBox;
         }
@@ -165,7 +226,6 @@ export class Editor {
         // this.stage.forEach(col => col.forEach(row => console.log({...row})));
 
         // console.log("STAGE antes de entrar al algoritmo: ", this.stage);
-        
 
         if (f.type === 'user')
             // console.log("Start:", f,   "Goal: ", s);
@@ -175,6 +235,7 @@ export class Editor {
             return await this.astart(s, f);
     }
 
+    c: number = 7;
     clearPath(path: Box[]) {
         // remove animation
         clearInterval(this.animation);
@@ -184,12 +245,60 @@ export class Editor {
         this.context.closePath();
 
         path.forEach(p => {
-            this.context.clearRect(p?.x * this.widthTiles, p?.y * this.heightTiles, this.heightTiles, this.heightTiles)
+            this.context.clearRect(p?.x * this.widthTiles - this.c, p?.y * this.heightTiles - this.c, this.imageUser.width, this.imageUser.height)
         });
 
         // remove start and end object from stage
         this.addBox(new Box(path[0].x, path[0].y, 'ground', { columns: this.columns, rows: this.rows }));
         this.addBox(new Box(path[path.length - 1].x, path[path.length - 1].y, 'ground', { columns: this.columns, rows: this.rows }));
+    }
+
+    animateGoal() {
+
+        let positionX = 350;
+        let positionY = 100;
+
+        let xGrowth = 0;
+        let yGrowth = 0;
+
+        setInterval(() => {
+            if (xGrowth > 10) return;
+
+
+            this.context.beginPath();
+            // this.context.clearRect(
+            //     positionX, positionY,
+            //     (this.imageLocation.width),
+            //     (this.imageLocation.height)
+            // );
+
+
+
+            // floor
+            this.context.drawImage(
+                this.imgFloor,
+                positionX - (xGrowth > 0 ? (xGrowth / 2) : 0),
+                // positionY* (yGrowth+1),
+                positionY,
+                (this.imgFloor.width + 10) + xGrowth,
+                (this.imgFloor.height + 5) + yGrowth
+            );
+
+            this.context.drawImage(
+                this.imageLocation,
+                positionX + 7 - (xGrowth > 0 ? (xGrowth / 2) : 0),
+                positionY - 23,
+                (this.imageLocation.width) + xGrowth,
+                (this.imageLocation.height+8) + yGrowth
+            );
+            xGrowth = xGrowth + 1;
+            yGrowth = yGrowth + 0.3;
+
+            this.context.closePath();
+        }, 1000 / 26);
+
+        this.context.globalCompositeOperation = 'source-over';
+
     }
 
     walkingThePath(path: Box[]) {
@@ -198,18 +307,85 @@ export class Editor {
         // draw guide lines
         this.animation = setInterval(() => {
             this.drawLines(path, '#1E9AFA', 1);
+            let ctx = this.context;
             if (p >= path.length - 1) {
+                clearInterval(this.animation);
+
+                let goal = path[path.length - 1];
+                let grow = 1;
+                let x: number = 0;
+                let y: number = 0;
+                let internalInter = setInterval(() => {
+                    if (grow > 2) return;
+                    let ctx = this.context;
+                    ctx.beginPath();
+                    x = goal.x * this.widthTiles - this.c + 5;
+                    y = goal.y * this.heightTiles - this.c - 10;
+                    ctx.drawImage(
+                        this.imageLocation,
+                        x - (grow === 2 ? (this.imageLocation.width - 10) : 0),
+                        y - (this.imageLocation.height * (grow - 1)),
+                        this.imageLocation.width * grow,
+                        this.imageLocation.height * grow);
+
+                    grow = grow + 0.5;
+
+                    ctx.closePath();
+                }, 1000 / 5);
+                setTimeout(() => {
+                    clearInterval(internalInter);
+                    ctx.clearRect(
+                        x - 10,
+                        y - 20,
+                        this.imageUser.width * grow,
+                        this.imageUser.height * grow);
+                    ctx.beginPath();
+                    ctx.fillStyle = path[p].type === 'ground' ? 'green' : path[p].color;
+                    ctx.fillRect(path[path.length - 1].x * this.widthTiles, path[path.length - 1].y * this.heightTiles, this.heightTiles, this.heightTiles)
+                    ctx.closePath();
+                    this.walkingThePath(path);
+                }, 800);
                 p = 0;  // repite animacion
             } else {
                 p++;
             }
-            let ctx = this.context;
-            ctx.clearRect(path[p - 1]?.x * this.widthTiles, path[p - 1]?.y * this.heightTiles, this.heightTiles, this.heightTiles)
+            // ctx.clearRect(path[p - 1]?.x * this.widthTiles, path[p - 1]?.y * this.heightTiles, this.heightTiles, this.heightTiles)
+            ctx.clearRect(path[p - 1]?.x * this.widthTiles - this.c, path[p - 1]?.y * this.heightTiles - this.c, this.imageUser.width, this.imageUser.height)
             ctx.beginPath();
             ctx.fillStyle = path[p].type === 'ground' ? 'green' : path[p].color;
-            ctx.fillRect(path[p].x * this.widthTiles, path[p].y * this.heightTiles, this.heightTiles, this.heightTiles)
+
+            let resX = path[p].x - path[p - 1]?.x;
+            let resY = path[p].y - path[p - 1]?.y;
+
+            let imgName = this.changeSprite(resX, resY);
+
+            // ctx.fillRect(path[p].x * this.widthTiles, path[p].y * this.heightTiles, this.heightTiles, this.heightTiles)
+            ctx.drawImage(this.spritesUser.get(imgName) || this.imageUser, path[p].x * this.widthTiles - this.c, path[p].y * this.heightTiles - this.c, this.imageUser.width, this.imageUser.height)
+            if (path[p - 2]) {
+                this.drawLines([path[p - 2], path[p - 1], path[p]], '#1E9AFA', 1)
+            }
             ctx.closePath();
-        }, 1000 / 10);
+        }, 1000 / 5);
+    }
+
+    animateLocation(goal: Box) {
+
+    }
+
+    changeSprite(resX: number, resY: number): string {
+        let coor: string = `${resX},${resY}`;
+        const SPRITE_BY_COORDINATES: { [key: string]: string } = {
+            '1,0': 'user0',
+            '1,-1': 'user45',
+            '0,-1': 'user90',
+            '-1,-1': 'user135',
+            '-1,0': 'user180',
+            '-1,1': 'user225',
+            '0,1': 'user270',
+            '1,1': 'user315',
+        };
+
+        return SPRITE_BY_COORDINATES[coor] || 'no hay';
     }
 
     drawLines(path: Box[], color: string, lineWidth: number) {
@@ -307,7 +483,7 @@ export class Editor {
                             }
                         }
                     }
-                } 
+                }
             }
         }
 

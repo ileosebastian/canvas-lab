@@ -10,13 +10,14 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   </div>
   <div>
     <label for="toggleGuide">Guia: </label>
-    <input type="checkbox" name="" id="toggleGuide" checked>
+    <input type="checkbox" name="" id="toggleGuide">
 
     <button id="obstacle-btn">Obstaculo</button> 
     <button id="start-btn">Origen</button> 
     <button id="end-btn">Destino</button> 
     <button id="init-path-btn">Iniciar Recorrido</button> 
     <button id="clear-btn">Limpiar Recorrido</button> 
+    <button id="goal-btn">Animar llegada</button> 
   </div>
 `;
 
@@ -28,6 +29,7 @@ const startBtn = document.getElementById('start-btn');
 const endBtn = document.getElementById('end-btn');
 const initPathBtn = document.getElementById('init-path-btn');
 const clearPathBtn = document.getElementById('clear-btn');
+const goalBtn = document.getElementById('goal-btn');
 
 let boxType: BoxType = 'ground';
 
@@ -37,14 +39,14 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
   // console.log(editor.widthTiles, editor.heightTiles);
   // console.log(editor.stage)
 
-  guide.style.width = `${canvas.width}px`;
-  guide.style.height = `${canvas.height}px`;
-  guide.style.gridTemplateColumns = `repeat(${editor.rows * 2}, 1fr)`;
-  guide.style.gridTemplateRows = `repeat(${editor.rows}, 1fr)`;
+  // guide.style.width = `${canvas.width}px`;
+  // guide.style.height = `${canvas.height}px`;
+  // guide.style.gridTemplateColumns = `repeat(${editor.rows * 2}, 1fr)`;
+  // guide.style.gridTemplateRows = `repeat(${editor.rows}, 1fr)`;
 
-  [...Array(editor.rows ** 2)].forEach(() =>
-    guide.insertAdjacentHTML("beforeend", "<div></div><div></div>")
-  );
+  // [...Array(editor.rows ** 2)].forEach(() =>
+  //   guide.insertAdjacentHTML("beforeend", "<div></div><div></div>")
+  // );
 
   canvas.addEventListener('mousedown', event => {
     if (event.button !== 0) return;
@@ -74,7 +76,7 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
     guide.style.display = toggleInput.checked ? '' : 'none';
   });
 
-  let res = [obstacleBtn, startBtn, endBtn, initPathBtn, clearPathBtn].every(btn => btn instanceof HTMLButtonElement);
+  let res = [obstacleBtn, startBtn, endBtn, initPathBtn, clearPathBtn, goalBtn].every(btn => btn instanceof HTMLButtonElement);
 
   let isClicked = false;
   let isClickedObstacle = false;
@@ -83,7 +85,7 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
 
   let path: Box[] | null;
 
-  if (res && obstacleBtn && startBtn && endBtn && initPathBtn && clearPathBtn) {
+  if (res && obstacleBtn && startBtn && endBtn && initPathBtn && clearPathBtn && goalBtn) {
     obstacleBtn.addEventListener('click', () => {
       isClicked = isClickedObstacle ? false : true;
 
@@ -129,5 +131,9 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
       if (path)
         editor.clearPath(path);
     });
+
+    goalBtn.addEventListener('click', () => {
+      editor.animateGoal();
+    })
   }
 }
