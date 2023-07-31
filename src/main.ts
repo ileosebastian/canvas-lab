@@ -121,7 +121,8 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
         // draw 2D tour
         // path.forEach(g => console.log(`->${g.kindOption} (${g.x},${g.y}) es ${g.type}`))
 
-        editor.walkingThePath(path);
+        // editor.walkingThePathWithSprite(path);
+        editor.walkingThePathWithLines(path);
       } else {
         alert("Debe ingresar el origen y destino antes de iniciar el recorrido");
       }
@@ -133,7 +134,7 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
     });
 
     goalBtn.addEventListener('click', () => {
-      editor.animateGoal();
+      // editor.animateGoal();
     })
   }
 }

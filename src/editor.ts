@@ -189,7 +189,8 @@ export class Editor {
             console.log("EL OBJETO ES", newBox)
             if (newBox.type === 'user') {
                 console.log("entra")
-                this.drawImg(newBox);
+                // this.drawImg(newBox);
+                this.drawBox(newBox);
             } else {
                 console.log("entra como no user")
                 this.drawBox(newBox);
@@ -253,10 +254,10 @@ export class Editor {
         this.addBox(new Box(path[path.length - 1].x, path[path.length - 1].y, 'ground', { columns: this.columns, rows: this.rows }));
     }
 
-    animateGoal() {
+    animateGoal(x: number, y: number) {
 
-        let positionX = 350;
-        let positionY = 100;
+        let positionX = x-10;
+        let positionY = y-13;
 
         let xGrowth = 0;
         let yGrowth = 0;
@@ -289,7 +290,7 @@ export class Editor {
                 positionX + 7 - (xGrowth > 0 ? (xGrowth / 2) : 0),
                 positionY - 23,
                 (this.imageLocation.width) + xGrowth,
-                (this.imageLocation.height+8) + yGrowth
+                (this.imageLocation.height + 8) + yGrowth
             );
             xGrowth = xGrowth + 1;
             yGrowth = yGrowth + 0.3;
@@ -301,7 +302,58 @@ export class Editor {
 
     }
 
-    walkingThePath(path: Box[]) {
+    walkingThePathWithLines(path: Box[]) {
+        let index = 0;
+        let ctx = this.context;
+        let center = 5;
+        let color = '#1E9AFA';
+        let lineWidth = 1;
+
+        // ctx.beginPath();
+        // ctx.moveTo(path[0].x * this.widthTiles + center, path[0].y * this.heightTiles + center);
+        // ctx.lineTo(path[1].x * this.widthTiles + center, path[1].y * this.heightTiles + center);
+        // ctx.strokeStyle = color;
+        // ctx.lineWidth = lineWidth;
+        // ctx.stroke();
+        // ctx.closePath();
+
+        this.animation = setInterval(() => {
+            if (index >= path.length -1) {
+                clearInterval(this.animation);
+                let x = path[path.length-1].x * this.widthTiles;
+                let y: number;
+                if (path[0].y - path[path.length-1].y >= 0) {
+                    y = path[path.length-1].y * this.heightTiles - this.heightTiles;
+                } else {
+                    y = path[path.length-1].y * this.heightTiles + (this.heightTiles*6);
+                }
+                this.animateGoal(x, y)
+                setTimeout(() => {
+                    ctx.clearRect(
+                        x-15, y-38,
+                        this.imageLocation.width * 2.6,
+                        this.imageLocation.height * 1.9
+                    );
+                    index = 0;
+                    this.drawLines(path, 'white', 5);
+                    this.walkingThePathWithLines(path);
+                },700);
+
+            } else {
+                index++;
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(path[index - 1]?.x * this.widthTiles + center, path[index - 1]?.y * this.heightTiles + center);
+            ctx.lineTo(path[index].x * this.widthTiles + center, path[index].y * this.heightTiles + center);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+            ctx.closePath();
+        }, 1000 / 10);
+    }
+
+    walkingThePathWithSprite(path: Box[]) {
         let p = 0;
         // this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         // draw guide lines
@@ -309,42 +361,11 @@ export class Editor {
             this.drawLines(path, '#1E9AFA', 1);
             let ctx = this.context;
             if (p >= path.length - 1) {
-                clearInterval(this.animation);
-
-                let goal = path[path.length - 1];
-                let grow = 1;
-                let x: number = 0;
-                let y: number = 0;
-                let internalInter = setInterval(() => {
-                    if (grow > 2) return;
-                    let ctx = this.context;
-                    ctx.beginPath();
-                    x = goal.x * this.widthTiles - this.c + 5;
-                    y = goal.y * this.heightTiles - this.c - 10;
-                    ctx.drawImage(
-                        this.imageLocation,
-                        x - (grow === 2 ? (this.imageLocation.width - 10) : 0),
-                        y - (this.imageLocation.height * (grow - 1)),
-                        this.imageLocation.width * grow,
-                        this.imageLocation.height * grow);
-
-                    grow = grow + 0.5;
-
-                    ctx.closePath();
-                }, 1000 / 5);
-                setTimeout(() => {
-                    clearInterval(internalInter);
-                    ctx.clearRect(
-                        x - 10,
-                        y - 20,
-                        this.imageUser.width * grow,
-                        this.imageUser.height * grow);
-                    ctx.beginPath();
-                    ctx.fillStyle = path[p].type === 'ground' ? 'green' : path[p].color;
-                    ctx.fillRect(path[path.length - 1].x * this.widthTiles, path[path.length - 1].y * this.heightTiles, this.heightTiles, this.heightTiles)
-                    ctx.closePath();
-                    this.walkingThePath(path);
-                }, 800);
+                ctx.beginPath();
+                ctx.clearRect(path[path.length - 1]?.x * this.widthTiles - this.c, path[path.length - 1]?.y * this.heightTiles - this.c, this.imageUser.width, this.imageUser.height)
+                ctx.fillStyle = path[p].type === 'ground' ? 'green' : path[p].color;
+                ctx.fillRect(path[path.length - 1].x * this.widthTiles, path[path.length - 1].y * this.heightTiles, this.heightTiles, this.heightTiles)
+                ctx.closePath();
                 p = 0;  // repite animacion
             } else {
                 p++;
