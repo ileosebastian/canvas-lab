@@ -39,6 +39,8 @@ export class Editor {
     ];
     imgFloor = new Image();
 
+    stairImage!: HTMLImageElement;
+
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         let ctx = this.canvas.getContext('2d');
@@ -82,6 +84,10 @@ export class Editor {
 
         // add neighbors for each cell
         this.stage.forEach(column => column.forEach(row => row.addNeighbors(this.stage)));
+
+        img = new Image();
+        img.src = `../public/stair.svg`;
+        this.stairImage = img;
 
         this.generateSamplePlane();
 
@@ -140,6 +146,8 @@ export class Editor {
             this.stage[41][r] = new Box(41, r, 'wall', { columns: this.columns, rows: this.rows });
         }
 
+        // this.context.drawImage(this.stairImage, this.stage[41][20].x * this.widthTiles, this.stage[41][20].y * this.heightTiles);
+        console.log("entra")
     }
 
     drawBox(box: Box) {
@@ -192,6 +200,7 @@ export class Editor {
                 console.log("entra")
                 // this.drawImg(newBox);
                 this.drawBox(newBox);
+                this.context.drawImage(this.stairImage, 320, 150);
             } else {
                 console.log("entra como no user")
                 this.drawBox(newBox);
@@ -266,15 +275,7 @@ export class Editor {
         setInterval(() => {
             if (xGrowth > 10) return;
 
-
             this.context.beginPath();
-            // this.context.clearRect(
-            //     positionX, positionY,
-            //     (this.imageLocation.width),
-            //     (this.imageLocation.height)
-            // );
-
-
 
             // floor
             this.context.drawImage(
@@ -310,14 +311,6 @@ export class Editor {
         let color = '#1E9AFA';
         let lineWidth = 1;
 
-        // ctx.beginPath();
-        // ctx.moveTo(path[0].x * this.widthTiles + center, path[0].y * this.heightTiles + center);
-        // ctx.lineTo(path[1].x * this.widthTiles + center, path[1].y * this.heightTiles + center);
-        // ctx.strokeStyle = color;
-        // ctx.lineWidth = lineWidth;
-        // ctx.stroke();
-        // ctx.closePath();
-
         this.animation = setInterval(() => {
             if (index >= path.length -1) {
                 clearInterval(this.animation);
@@ -337,6 +330,7 @@ export class Editor {
                     );
                     index = 0;
                     this.drawLines(path, 'white', 5);
+                    this.context.drawImage(this.stairImage, 320, 150);
                     this.walkingThePathWithLines(path);
                 },700);
 
