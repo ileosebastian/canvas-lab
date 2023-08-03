@@ -262,6 +262,7 @@ export class Editor {
         // remove start and end object from stage
         this.addBox(new Box(path[0].x, path[0].y, 'ground', { columns: this.columns, rows: this.rows }));
         this.addBox(new Box(path[path.length - 1].x, path[path.length - 1].y, 'ground', { columns: this.columns, rows: this.rows }));
+        this.context.drawImage(this.stairImage, 320, 150);
     }
 
     animateGoal(x: number, y: number) {
