@@ -107,35 +107,36 @@ export class Editor {
     }
 
     generateSamplePlane() {
+        // alert(this.stage.length + " - " + this.stage[0].length)
         // wall top
         for (let c = 0; c < 30; c++) {
-            this.stage[c][14] = new Box(c, 14, 'wall', { columns: this.columns, rows: this.rows });
+            this.stage[c][11] = new Box(c, 11, 'wall', { columns: this.columns, rows: this.rows });
         }
         for (let c = 0; c < 30; c++) {
-            this.stage[c][26] = new Box(c, 26, 'wall', { columns: this.columns, rows: this.rows });
+            this.stage[c][20] = new Box(c, 20, 'wall', { columns: this.columns, rows: this.rows });
         }
 
         for (let c = 41; c < this.columns; c++) {
-            this.stage[c][14] = new Box(c, 14, 'wall', { columns: this.columns, rows: this.rows });
+            this.stage[c][11] = new Box(c, 11, 'wall', { columns: this.columns, rows: this.rows });
         }
         for (let c = 41; c < this.columns; c++) {
-            this.stage[c][26] = new Box(c, 26, 'wall', { columns: this.columns, rows: this.rows });
+            this.stage[c][20] = new Box(c, 20, 'wall', { columns: this.columns, rows: this.rows });
         }
 
 
-        for (let r = 0; r < 15; r++) {
+        for (let r = 0; r < 12; r++) {
             this.stage[30][r] = new Box(30, r, 'wall', { columns: this.columns, rows: this.rows });
         }
 
-        for (let r = 26; r < this.rows; r++) {
+        for (let r = 20; r < this.rows; r++) {
             this.stage[30][r] = new Box(30, r, 'wall', { columns: this.columns, rows: this.rows });
         }
 
-        for (let r = 0; r < 15; r++) {
+        for (let r = 0; r < 12; r++) {
             this.stage[41][r] = new Box(41, r, 'wall', { columns: this.columns, rows: this.rows });
         }
 
-        for (let r = 26; r < this.rows; r++) {
+        for (let r = 21; r < this.rows; r++) {
             this.stage[41][r] = new Box(41, r, 'wall', { columns: this.columns, rows: this.rows });
         }
 

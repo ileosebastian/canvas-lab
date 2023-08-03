@@ -6,7 +6,7 @@ import { Box, BoxType } from './boxes';
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
     <div id="guide"></div>
-    <canvas id="canvas" width="700" height="400" class="canvas"></canvas>
+    <canvas id="canvas" width="700" height="300" class="canvas"></canvas>
   </div>
   <div>
     <label for="toggleGuide">Guia: </label>
