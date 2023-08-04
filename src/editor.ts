@@ -1,4 +1,5 @@
 import { Box, BoxType, GROUND_BOX } from './boxes';
+import { routeStatic } from './static-route';
 
 export class Editor {
 
@@ -224,8 +225,6 @@ export class Editor {
                 break;
         }
 
-        // console.log("Los points", points);
-
         if (points.length < 2 || points.some(val => val === undefined)) {
             return null;
         }
@@ -233,17 +232,19 @@ export class Editor {
         // init algoritm
         let [f, s] = points;
         // update neighbors
-        // this.stage.forEach(col => col.forEach(row => row.addNeighbors(this.stage)));
-        // this.stage.forEach(col => col.forEach(row => console.log({...row})));
 
-        // console.log("STAGE antes de entrar al algoritmo: ", this.stage);
-
-        if (f.type === 'user')
+        if (f.type === 'user') {
             // console.log("Start:", f,   "Goal: ", s);
-            return await this.astart(f, s);
-        else
+            // return await this.astart(f, s);
+
+            return await routeStatic(f, s, this.columns, this.rows);
+            // return null;
+        } else {
             // console.log("Start:", s,   "Goal: ", f);
-            return await this.astart(s, f);
+            // return await this.astart(s, f);
+            return await routeStatic(s, f, this.columns, this.rows);
+            return null;
+        }
     }
 
     c: number = 7;
@@ -383,10 +384,6 @@ export class Editor {
             }
             ctx.closePath();
         }, 1000 / 5);
-    }
-
-    animateLocation(goal: Box) {
-
     }
 
     changeSprite(resX: number, resY: number): string {
