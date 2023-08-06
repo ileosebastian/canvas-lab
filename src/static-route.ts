@@ -11,18 +11,29 @@ export const routeStatic = async (start: Box, goal: Box, columns: number, rows: 
 
     console.log("DEL START, con respecto al GOAL:")
     console.log("------------Y")
+    let realGoal = goal;
 
-    // let tmp = start;
-    // let temporalY = 0;
-    // let temporalX = 0;
-    // let neighbors: Box[] = [];
-    // while (tmp.x !== goal.x && tmp.y !== goal.y) {
-    //     if (tmp.y >= goal.y) {
-    //         neighbors = tmp.neighbors.filter(n => n.y < tmp.y && (n.x >));
-    //     } else {
-    //         neighbors = tmp.neighbors.filter(n => n.y > tmp.y);
-    //     }
-    // }
+
+    // izquierda
+    if (goal.y === start.y && goal.x > start.x) {
+        goal = goal.neighbors.filter(n => n.y === goal.y && n.x < goal.x).pop() || goal;
+    }
+
+    // derecha
+    if (goal.y === start.y && goal.x < start.x) {
+        goal = goal.neighbors.filter(n => n.y === goal.y && n.x > goal.x).pop() || goal;
+    }
+
+    // arriba
+    if (goal.y > middleRow) {
+        goal = goal.neighbors.filter(n => n.x === goal.x && n.y < goal.y).pop() || goal;
+    }
+
+    // abajo
+    if (goal.y < middleRow) {
+        goal = goal.neighbors.filter(n => n.x === goal.x && n.y > goal.y).pop() || goal;
+    }
+    
 
     if (start.y >= goal.y) {
         console.log("esta hacia abajo o al centro");
@@ -30,7 +41,7 @@ export const routeStatic = async (start: Box, goal: Box, columns: number, rows: 
         route.push(tmp);
         while (tmp.y > goal.y) {
             let neighbor = tmp.neighbors.filter(n => (n.y < tmp.y && n.x === tmp.x) && n.neighbors.every(n => n.type !== 'wall'));
-            
+            if (neighbor.length === 0) return null; 
             tmp = neighbor.pop() || tmp;
             route.push(tmp);
             console.log("tengo que ir por aqui de subida", `[${tmp.x}, ${tmp.y}]`);
@@ -43,6 +54,7 @@ export const routeStatic = async (start: Box, goal: Box, columns: number, rows: 
         route.push(tmp);
         while (tmp.y < goal.y) {
             let neighbor = tmp.neighbors.filter(n => (n.y > tmp.y && n.x === tmp.x) && n.neighbors.every(n => n.type !== 'wall'));
+            if (neighbor.length === 0) return null; 
             
             tmp = neighbor.pop() || tmp;
             route.push(tmp);
@@ -59,6 +71,7 @@ export const routeStatic = async (start: Box, goal: Box, columns: number, rows: 
         route.push(tmp);
         while(tmp.x > goal.x) {
             let neighbor = tmp.neighbors.filter(n => (n.x < tmp.x && n.y === tmp.y) && n.neighbors.every(n => n.type !== 'wall'));
+            if (neighbor.length === 0) return null; 
 
             // console.log("tengo que ir por aqui de subida", ...neighbor);
 
@@ -72,16 +85,22 @@ export const routeStatic = async (start: Box, goal: Box, columns: number, rows: 
         route.push(tmp);
         while(tmp.x < goal.x) {
             let neighbor = tmp.neighbors.filter(n => (n.x > tmp.x && n.y === tmp.y) && n.neighbors.every(n => n.type !== 'wall'));
+            if (neighbor.length === 0) return null; 
 
             // console.log("tengo que ir por aqui de subida", ...neighbor);
 
             tmp = neighbor.pop() || tmp;
             route.push(tmp);
-            console.log("tengo que ir por aqui de subida", `[${tmp.x}, ${tmp.y}]`);
+            console.log("tengo que ir por aqui de subida", `[${tmp.x}, ${tmp.y}]`, tmp.type);
         } 
     }
 
-    return route.length === 0 ? null : route;
+    if (route.length === 0) {
+        return null;
+    } else {
+        route.push(realGoal);
+        return route;
+    }
 };
 
 

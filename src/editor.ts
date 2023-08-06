@@ -232,17 +232,18 @@ export class Editor {
         // init algoritm
         let [f, s] = points;
         // update neighbors
+        this.stage.forEach(col => col.forEach(row => row.addNeighbors(this.stage)))
 
         if (f.type === 'user') {
             // console.log("Start:", f,   "Goal: ", s);
-            // return await this.astart(f, s);
+            return await this.astart(f, s);
 
-            return await routeStatic(f, s, this.columns, this.rows);
+            // return await routeStatic(f, s, this.columns, this.rows);
             // return null;
         } else {
             // console.log("Start:", s,   "Goal: ", f);
-            // return await this.astart(s, f);
-            return await routeStatic(s, f, this.columns, this.rows);
+            return await this.astart(s, f);
+            // return await routeStatic(s, f, this.columns, this.rows);
             return null;
         }
     }
@@ -268,8 +269,8 @@ export class Editor {
 
     animateGoal(x: number, y: number) {
 
-        let positionX = x-10;
-        let positionY = y-13;
+        let positionX = x - 10;
+        let positionY = y - 13;
 
         let xGrowth = 0;
         let yGrowth = 0;
@@ -314,19 +315,20 @@ export class Editor {
         let lineWidth = 1;
 
         this.animation = setInterval(() => {
-            if (index >= path.length -1) {
+            if (index >= path.length - 1) {
                 clearInterval(this.animation);
-                let x = path[path.length-1].x * this.widthTiles;
+                let x = path[path.length - 1].x * this.widthTiles;
                 let y: number;
-                if (path[0].y - path[path.length-1].y >= 0) {
-                    y = path[path.length-1].y * this.heightTiles - this.heightTiles;
+                // to show locate animation top or bottom with respecto to goal
+                if (path[0].y - path[path.length - 1].y >= 0) {
+                    y = path[path.length - 1].y * this.heightTiles - this.heightTiles;
                 } else {
-                    y = path[path.length-1].y * this.heightTiles + (this.heightTiles*6);
+                    y = path[path.length - 1].y * this.heightTiles + (this.heightTiles * 6);
                 }
                 this.animateGoal(x, y)
                 setTimeout(() => {
                     ctx.clearRect(
-                        x-15, y-38,
+                        x - 15, y - 38,
                         this.imageLocation.width * 2.6,
                         this.imageLocation.height * 1.9
                     );
@@ -334,56 +336,54 @@ export class Editor {
                     this.drawLines(path, 'white', 5);
                     this.context.drawImage(this.stairImage, 320, 150);
                     this.walkingThePathWithLines(path);
-                },700);
-
+                }, 700);
             } else {
                 index++;
             }
 
-            ctx.beginPath();
-            ctx.moveTo(path[index - 1]?.x * this.widthTiles + center, path[index - 1]?.y * this.heightTiles + center);
-            ctx.lineTo(path[index].x * this.widthTiles + center, path[index].y * this.heightTiles + center);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = lineWidth;
-            ctx.stroke();
-            ctx.closePath();
+            if ((index + 1) !== path.length - 1 && path[index + 1] && this.correctTrajectory(path[index - 1], path[index + 1])) {
+                this.drawLine(path[index - 1], path[index + 1], center, color, lineWidth, ctx);
+                index++;
+            } else {
+                this.drawLine(path[index - 1], path[index], center, color, lineWidth, ctx);
+            }
+            
         }, 1000 / 10);
     }
 
-    walkingThePathWithSprite(path: Box[]) {
-        let p = 0;
-        // this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        // draw guide lines
-        this.animation = setInterval(() => {
-            this.drawLines(path, '#1E9AFA', 1);
-            let ctx = this.context;
-            if (p >= path.length - 1) {
-                ctx.beginPath();
-                ctx.clearRect(path[path.length - 1]?.x * this.widthTiles - this.c, path[path.length - 1]?.y * this.heightTiles - this.c, this.imageUser.width, this.imageUser.height)
-                ctx.fillStyle = path[p].type === 'ground' ? 'green' : path[p].color;
-                ctx.fillRect(path[path.length - 1].x * this.widthTiles, path[path.length - 1].y * this.heightTiles, this.heightTiles, this.heightTiles)
-                ctx.closePath();
-                p = 0;  // repite animacion
-            } else {
-                p++;
-            }
-            // ctx.clearRect(path[p - 1]?.x * this.widthTiles, path[p - 1]?.y * this.heightTiles, this.heightTiles, this.heightTiles)
-            ctx.clearRect(path[p - 1]?.x * this.widthTiles - this.c, path[p - 1]?.y * this.heightTiles - this.c, this.imageUser.width, this.imageUser.height)
-            ctx.beginPath();
-            ctx.fillStyle = path[p].type === 'ground' ? 'green' : path[p].color;
+    drawLine(previous: Box, next: Box, center: number, color: string, lineWidth: number, ctx: CanvasRenderingContext2D) {
+        ctx.beginPath();
+        ctx.moveTo(previous?.x * this.widthTiles + center, previous?.y * this.heightTiles + center);
+        ctx.lineTo(next.x * this.widthTiles + center, next.y * this.heightTiles + center);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
+        ctx.closePath();
+    }
 
-            let resX = path[p].x - path[p - 1]?.x;
-            let resY = path[p].y - path[p - 1]?.y;
+    correctTrajectory(prevPath: Box, nextPath: Box): boolean {
 
-            let imgName = this.changeSprite(resX, resY);
+        // esquina superior derecha
+        if (prevPath.x + 1 === nextPath.x && prevPath.y - 1 === nextPath.y) {
+            return true;
+        }
 
-            // ctx.fillRect(path[p].x * this.widthTiles, path[p].y * this.heightTiles, this.heightTiles, this.heightTiles)
-            ctx.drawImage(this.spritesUser.get(imgName) || this.imageUser, path[p].x * this.widthTiles - this.c, path[p].y * this.heightTiles - this.c, this.imageUser.width, this.imageUser.height)
-            if (path[p - 2]) {
-                this.drawLines([path[p - 2], path[p - 1], path[p]], '#1E9AFA', 1)
-            }
-            ctx.closePath();
-        }, 1000 / 5);
+        // esquina inferior derecha
+        if (prevPath.x + 1 === nextPath.x && prevPath.y + 1 === nextPath.y) {
+            return true;
+        }
+
+        // esquina inferior izquierda 
+        if (prevPath.x - 1 === nextPath.x && prevPath.y + 1 === nextPath.y) {
+            return true;
+        }
+
+        // esquina superior izquierda 
+        if (prevPath.x - 1 === nextPath.x && prevPath.y - 1 === nextPath.y) {
+            return true;
+        }
+
+        return false; // no hay que corregir trayectoria
     }
 
     changeSprite(resX: number, resY: number): string {
@@ -448,13 +448,15 @@ export class Editor {
         return lowestBox;
     }
 
-    reconstructPath(cameFrom: Map<Box, Box>, current: Box): Box[] {
+    reconstructPath(cameFrom: Map<Box, Box>, current: Box, goal: Box): Box[] {
         const total_path = [current];
 
         while (cameFrom.has(current)) {
             current = <Box>cameFrom.get(current);
             total_path.unshift(current);
         }
+
+        total_path.push(goal);
 
         return total_path;
     }
@@ -465,6 +467,41 @@ export class Editor {
         const gScore = new Map<Box, number>();
         const fScore = new Map<Box, number>(); // f(n) = g(n) + h(n)
 
+        let middleCol = Math.floor(this.columns / 2);
+        let middleRow = Math.floor(this.rows / 2);
+        let realGoal = goal;
+
+
+        // izquierda
+        if (goal.y === start.y && goal.x > start.x) {
+            goal = goal.neighbors.filter(n => n.y === goal.y && n.x < goal.x).pop() || goal;
+        }
+
+        // derecha
+        if (goal.y === start.y && goal.x < start.x) {
+            goal = goal.neighbors.filter(n => n.y === goal.y && n.x > goal.x).pop() || goal;
+        }
+
+        // arriba
+        if (goal.y > middleRow) {
+            goal = goal.neighbors.filter(n => n.x === goal.x && n.y < goal.y).pop() || goal;
+        }
+
+        // abajo
+        if (goal.y < middleRow) {
+            if (goal.neighbors.filter(n => n.type === 'wall' && n.y > goal.y).length > 0) {
+                alert('poner el goal arriba')
+                let possible = goal.neighbors.filter(n => n.x === goal.x && n.y < goal.y).pop() || goal;
+
+                goal = possible;
+            } else {
+                let possible = goal.neighbors.filter(n => n.x === goal.x && n.y > goal.y).pop() || goal;
+                // alert("se fuer por aqui")
+
+                goal = possible;
+            }
+        }
+
         gScore.set(start, 0);
         fScore.set(start, this.heuristic(start, goal));
 
@@ -473,7 +510,9 @@ export class Editor {
 
             if (current === goal) {
                 // console.log("encontrado");
-                return this.reconstructPath(cameFrom, current);
+                // cameFrom.set(current, realGoal);
+                console.log("PATH:", cameFrom)
+                return this.reconstructPath(cameFrom, current, realGoal);
             }
 
             openSet.splice(openSet.indexOf(current), 1); // remove one element, the current box

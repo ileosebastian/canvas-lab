@@ -62,60 +62,60 @@ export class Box {
             'top-left-corner': [ // x = 0, y = 0
                 { x: this.x, y: this.y + 1 }, // abajo
                 { x: this.x + 1, y: this.y }, // derecha 
-                { x: this.x + 1, y: this.y+1 }, // esquina inferior derecha
+                // { x: this.x + 1, y: this.y+1 }, // esquina inferior derecha
             ],
             'top': [
                 { x: this.x - 1, y: this.y }, // izquierda
                 { x: this.x + 1, y: this.y }, // derecha
                 { x: this.x, y: this.y + 1 }, // abajo
-                { x: this.x - 1, y: this.y+1 }, // esquina inferior izquierda
-                { x: this.x + 1, y: this.y+1 }, // esquina inferior derecha
+                // { x: this.x - 1, y: this.y+1 }, // esquina inferior izquierda
+                // { x: this.x + 1, y: this.y+1 }, // esquina inferior derecha
             ],
             'top-right-corner': [ // x = columns-1, y = 0
                 { x: this.x, y: this.y + 1 }, // abajo
                 { x: this.x - 1, y: this.y }, // izquierda
-                { x: this.x - 1, y: this.y+1 }, // esquina inferior izquierda
+                // { x: this.x - 1, y: this.y+1 }, // esquina inferior izquierda
             ],
             'left': [
                 { x: this.x, y: this.y - 1 }, // arriba 
                 { x: this.x, y: this.y + 1 }, // abajo
                 { x: this.x + 1, y: this.y }, // derecha
-                { x: this.x + 1, y: this.y - 1 }, // esquina superior derecha
-                { x: this.x + 1, y: this.y+1 }, // esquina inferior derecha
+                // { x: this.x + 1, y: this.y - 1 }, // esquina superior derecha
+                // { x: this.x + 1, y: this.y+1 }, // esquina inferior derecha
             ],
             'body': [
                 { x: this.x, y: this.y - 1 }, // arriba
                 { x: this.x, y: this.y + 1 }, // abajo
                 { x: this.x - 1, y: this.y }, // izquieda
                 { x: this.x + 1, y: this.y }, // derecha
-                { x: this.x + 1, y: this.y - 1 }, // esquina superior derecha
-                { x: this.x + 1, y: this.y + 1 }, // esquina inferior derecha
-                { x: this.x - 1, y: this.y + 1 }, // esquina inferior izquierda
-                { x: this.x - 1, y: this.y - 1 }, // esquina superior izquierda 
+                // { x: this.x + 1, y: this.y - 1 }, // esquina superior derecha
+                // { x: this.x + 1, y: this.y + 1 }, // esquina inferior derecha
+                // { x: this.x - 1, y: this.y + 1 }, // esquina inferior izquierda
+                // { x: this.x - 1, y: this.y - 1 }, // esquina superior izquierda 
             ],
             'right': [
                 { x: this.x, y: this.y - 1 }, // arriba
                 { x: this.x, y: this.y + 1 }, // abajo
                 { x: this.x - 1, y: this.y }, // izquierda
-                { x: this.x - 1, y: this.y - 1 }, // esquina superior izquierda 
-                { x: this.x - 1, y: this.y + 1 }, // esquina inferior izquierda
+                // { x: this.x - 1, y: this.y - 1 }, // esquina superior izquierda 
+                // { x: this.x - 1, y: this.y + 1 }, // esquina inferior izquierda
             ],
             'bottom-left-corner': [ // x = 0, y = rows-1
                 { x: this.x, y: this.y - 1 }, // arriba
                 { x: this.x + 1, y: this.y }, // derecha
-                { x: this.x + 1, y: this.y - 1 }, // esquina superior derecha
+                // { x: this.x + 1, y: this.y - 1 }, // esquina superior derecha
             ],
             'bottom': [
                 { x: this.x - 1, y: this.y }, // izquierda
                 { x: this.x + 1, y: this.y }, // derecha
                 { x: this.x, y: this.y - 1 }, // arriba
-                { x: this.x + 1, y: this.y - 1 }, // esquina superior derecha
-                { x: this.x - 1, y: this.y - 1 }, // esquina superior izquierda 
+                // { x: this.x + 1, y: this.y - 1 }, // esquina superior derecha
+                // { x: this.x - 1, y: this.y - 1 }, // esquina superior izquierda 
             ],
             'bottom-right-corner': [ // x = columns-1, y = rows-1
                 { x: this.x, y: this.y - 1 }, // arriba
                 { x: this.x - 1, y: this.y }, // izquierda
-                { x: this.x - 1, y: this.y -1 }, // esquina superior izquierda 
+                // { x: this.x - 1, y: this.y -1 }, // esquina superior izquierda 
             ],
         };
 
