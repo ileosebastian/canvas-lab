@@ -5,23 +5,29 @@ import { Box, BoxType } from './boxes';
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
+    <div class="content-top">
+      <div id="numbers"></div>
+    </div>
     <div id="guide"></div>
     <canvas id="canvas" width="700" height="300" class="canvas"></canvas>
   </div>
   <div>
     <label for="toggleGuide">Guia: </label>
-    <input type="checkbox" name="" id="toggleGuide">
+    <input type="checkbox" name="" id="toggleGuide" checked>
 
     <button id="obstacle-btn">Obstaculo</button> 
     <button id="start-btn">Origen</button> 
     <button id="end-btn">Destino</button> 
     <button id="init-path-btn">Iniciar Recorrido</button> 
     <button id="clear-btn">Limpiar Recorrido</button> 
-    <button id="goal-btn">Animar llegada</button> 
+    <button id="middle-btn">Quitar bloques del medio</button> 
   </div>
 `;
+    
+    // <button id="goal-btn">Animar llegada</button> 
 
 const canvas = document.getElementById('canvas');
+const numbers = document.getElementById('numbers');
 const guide = document.getElementById('guide');
 const toggleInput = document.getElementById('toggleGuide');
 const obstacleBtn = document.getElementById('obstacle-btn');
@@ -29,7 +35,7 @@ const startBtn = document.getElementById('start-btn');
 const endBtn = document.getElementById('end-btn');
 const initPathBtn = document.getElementById('init-path-btn');
 const clearPathBtn = document.getElementById('clear-btn');
-const goalBtn = document.getElementById('goal-btn');
+const middleBtn = document.getElementById('middle-btn');
 
 let boxType: BoxType = 'ground';
 
@@ -47,6 +53,19 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
   // [...Array(editor.rows ** 2)].forEach(() =>
   //   guide.insertAdjacentHTML("beforeend", "<div></div><div></div>")
   // );
+
+ if (numbers) {
+    numbers.innerHTML += `<p>${1}</p>`;
+    [...Array(editor.columns)].forEach((val, index) => {
+      if (index === Math.floor(editor.columns/2))
+        numbers.innerHTML += `<p>${index}</p>`;
+      else {
+        console.log(index)
+        numbers.innerHTML += `<p style="color: white; font-size: 9.84px">${index}</p>`;
+      }
+    });
+    numbers.innerHTML += `<p>${editor.columns}</p>`;
+  }
 
   canvas.addEventListener('mousedown', event => {
     if (event.button !== 0) return;
@@ -74,9 +93,11 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
 
   toggleInput.addEventListener("change", () => {
     guide.style.display = toggleInput.checked ? '' : 'none';
+    editor.showGuidelines = !editor.showGuidelines;
+    editor.generateEditor();
   });
 
-  let res = [obstacleBtn, startBtn, endBtn, initPathBtn, clearPathBtn, goalBtn].every(btn => btn instanceof HTMLButtonElement);
+  let res = [obstacleBtn, startBtn, endBtn, initPathBtn, clearPathBtn, middleBtn].every(btn => btn instanceof HTMLButtonElement);
 
   let isClicked = false;
   let isClickedObstacle = false;
@@ -85,7 +106,7 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
 
   let path: Box[] | null;
 
-  if (res && obstacleBtn && startBtn && endBtn && initPathBtn && clearPathBtn && goalBtn) {
+  if (res && obstacleBtn && startBtn && endBtn && initPathBtn && clearPathBtn && middleBtn) {
     obstacleBtn.addEventListener('click', () => {
       isClicked = isClickedObstacle ? false : true;
 
@@ -133,8 +154,17 @@ if (canvas instanceof HTMLCanvasElement && guide && toggleInput instanceof HTMLI
         editor.clearPath(path);
     });
 
-    goalBtn.addEventListener('click', () => {
+    middleBtn.addEventListener('click', () => {
       // editor.animateGoal();
+      if (editor.showMiddleObstacle) {
+        middleBtn.innerHTML = `Poner bloques del medio`;
+        editor.showMiddleObstacle = false;
+      } else {
+        middleBtn.innerHTML = `Quitar bloques del medio`;
+        editor.showMiddleObstacle = true;
+      }
+      editor.generateSamplePlane();
+      editor.generateEditor();
     })
   }
 }

@@ -37,6 +37,24 @@ body {
   height: 100%;
 }
 
+
+.content-top {
+  position: absolute;
+  height: 0px;
+}
+
+#numbers {
+  position: relative;
+  height: 0px;
+  top: -25px;
+}
+
+#numbers>p {
+  display: inline;
+  color: red;
+  font-size: x-small;
+}
+
 #guide {
     display: grid;
     pointer-events: none;

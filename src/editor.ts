@@ -1,5 +1,4 @@
 import { Box, BoxType, GROUND_BOX } from './boxes';
-import { routeStatic } from './static-route';
 
 export class Editor {
 
@@ -41,6 +40,9 @@ export class Editor {
     imgFloor = new Image();
 
     stairImage!: HTMLImageElement;
+
+    showMiddleObstacle!: boolean;
+    showGuidelines!: boolean;
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
@@ -90,8 +92,10 @@ export class Editor {
         img.src = `../public/stair.svg`;
         this.stairImage = img;
 
+        this.showMiddleObstacle = true;
         this.generateSamplePlane();
 
+        this.showGuidelines = true;
         this.generateEditor();
     }
 
@@ -106,15 +110,34 @@ export class Editor {
     }
 
     generateEditor() {
-        this.stage.forEach(column =>
-            column.forEach(row => {
+        
+        this.stage.forEach((column, index) =>{
+            column.forEach((row, index) => {
+                if (this.showGuidelines) {
+                    let center = 5;
+                    if (row.x === Math.floor(this.columns/2)) {
+                        this.context.moveTo(row?.x * this.widthTiles+center, row?.y*this.heightTiles);
+                        this.context.lineTo(row.x*this.widthTiles+center, (row.y+1)*this.heightTiles);
+                        this.context.strokeStyle = 'blue';
+                        this.context.lineWidth = 1;
+                        this.context.stroke();
+                    } 
+                    if (row.y === Math.floor(this.rows/2)) {
+                        this.context.moveTo(row?.x * this.widthTiles, row?.y*this.heightTiles+center);
+                        this.context.lineTo((row.x+1)*this.widthTiles, (row.y)*this.heightTiles+center);
+                        this.context.strokeStyle = 'blue';
+                        this.context.lineWidth = 1;
+                        this.context.stroke();
+                    }
+                }
+                
                 this.context.fillStyle = row.color;
                 this.context.fillRect(row.x * this.widthTiles, row.y * this.heightTiles, this.heightTiles, this.heightTiles);
-            }));
+            });
+        });
     }
 
     generateSamplePlane() {
-        // alert(this.stage.length + " - " + this.stage[0].length)
         // wall top
         for (let c = 0; c < 30; c++) {
             this.stage[c][11] = new Box(c, 11, 'wall', { columns: this.columns, rows: this.rows });
@@ -123,13 +146,48 @@ export class Editor {
             this.stage[c][20] = new Box(c, 20, 'wall', { columns: this.columns, rows: this.rows });
         }
 
-        for (let c = 41; c < this.columns; c++) {
+        for (let c = 34; c < this.columns; c++) {
             this.stage[c][11] = new Box(c, 11, 'wall', { columns: this.columns, rows: this.rows });
         }
         for (let c = 41; c < this.columns; c++) {
             this.stage[c][20] = new Box(c, 20, 'wall', { columns: this.columns, rows: this.rows });
         }
 
+        let typeBox: BoxType = this.showMiddleObstacle ? 'wall' : 'ground';
+        if (this.showMiddleObstacle) {
+            
+        }
+            for (let c = 0; c < 5; c++) {
+                this.stage[c][15] = new Box(c, 15, typeBox, { columns: this.columns, rows: this.rows });
+                this.stage[c][16] = new Box(c, 16, typeBox, { columns: this.columns, rows: this.rows });
+            }
+
+            for (let c = 10; c < 16; c++) {
+                this.stage[c][15] = new Box(c, 15, typeBox, { columns: this.columns, rows: this.rows });
+                this.stage[c][16] = new Box(c, 16, typeBox, { columns: this.columns, rows: this.rows });
+            }
+
+            for (let c = 21; c < 27; c++) {
+                this.stage[c][15] = new Box(c, 15, typeBox, { columns: this.columns, rows: this.rows });
+                this.stage[c][16] = new Box(c, 16, typeBox, { columns: this.columns, rows: this.rows });
+            }
+
+
+            for (let c = 45; c < 51; c++) {
+                this.stage[c][15] = new Box(c, 15, typeBox, { columns: this.columns, rows: this.rows });
+                this.stage[c][16] = new Box(c, 16, typeBox, { columns: this.columns, rows: this.rows });
+            }
+
+            for (let c = 55; c < 61; c++) {
+                this.stage[c][15] = new Box(c, 15, typeBox, { columns: this.columns, rows: this.rows });
+                this.stage[c][16] = new Box(c, 16, typeBox, { columns: this.columns, rows: this.rows });
+            }
+
+            for (let c = this.columns - 5; c < this.columns; c++) {
+                this.stage[c][15] = new Box(c, 15,typeBox, { columns: this.columns, rows: this.rows });
+                this.stage[c][16] = new Box(c, 16, typeBox, { columns: this.columns, rows: this.rows });
+            }
+        
 
         for (let r = 0; r < 12; r++) {
             this.stage[30][r] = new Box(30, r, 'wall', { columns: this.columns, rows: this.rows });
@@ -147,24 +205,11 @@ export class Editor {
             this.stage[41][r] = new Box(41, r, 'wall', { columns: this.columns, rows: this.rows });
         }
 
-        // this.context.drawImage(this.stairImage, this.stage[41][20].x * this.widthTiles, this.stage[41][20].y * this.heightTiles);
-        console.log("entra")
     }
 
     drawBox(box: Box) {
         this.context.fillStyle = box.color;
         this.context.fillRect(box.x * this.widthTiles, box.y * this.heightTiles, this.heightTiles, this.heightTiles);
-    }
-
-    drawImg(box: Box) {
-        console.log("entra a funcion dibujar img")
-        try {
-            if (this.spritesUser.has('user0') && this.spritesUser.get('user0')) {
-                this.context.drawImage(this.spritesUser.get('user90') || this.imageUser, box.x * this.widthTiles, box.y * this.heightTiles, this.imageUser.width, this.imageUser.height);
-            }
-        } catch (err) {
-            console.error(err);
-        }
     }
 
     addBox(box: Box) {
@@ -182,7 +227,6 @@ export class Editor {
         })
             ?.find(val => val.x === x && val.y === y);
 
-        // console.log("Se ha encontrado esto: ", box);
         return box || null;
     }
 
@@ -192,18 +236,13 @@ export class Editor {
         if (box) { // if box exist
             // create box
             let newBox = new Box(x, y, type, { columns: this.columns, rows: this.rows });
-            // this.stage.forEach(col => col.forEach(row => row.addNeighbors(this.stage)));
 
             // add box
             this.addBox(newBox);
-            console.log("EL OBJETO ES", newBox)
             if (newBox.type === 'user') {
-                console.log("entra")
-                // this.drawImg(newBox);
                 this.drawBox(newBox);
                 this.context.drawImage(this.stairImage, 320, 150);
             } else {
-                console.log("entra como no user")
                 this.drawBox(newBox);
             }
 
@@ -235,16 +274,12 @@ export class Editor {
         this.stage.forEach(col => col.forEach(row => row.addNeighbors(this.stage)))
 
         if (f.type === 'user') {
-            // console.log("Start:", f,   "Goal: ", s);
             return await this.astart(f, s);
 
             // return await routeStatic(f, s, this.columns, this.rows);
-            // return null;
         } else {
-            // console.log("Start:", s,   "Goal: ", f);
             return await this.astart(s, f);
             // return await routeStatic(s, f, this.columns, this.rows);
-            return null;
         }
     }
 
@@ -264,7 +299,9 @@ export class Editor {
         // remove start and end object from stage
         this.addBox(new Box(path[0].x, path[0].y, 'ground', { columns: this.columns, rows: this.rows }));
         this.addBox(new Box(path[path.length - 1].x, path[path.length - 1].y, 'ground', { columns: this.columns, rows: this.rows }));
-        this.context.drawImage(this.stairImage, 320, 150);
+        this.context.clearRect(320, 150, this.stairImage.width, this.stairImage.height);
+
+        this.generateEditor();
     }
 
     animateGoal(x: number, y: number) {
@@ -304,7 +341,6 @@ export class Editor {
         }, 1000 / 26);
 
         this.context.globalCompositeOperation = 'source-over';
-
     }
 
     walkingThePathWithLines(path: Box[]) {
@@ -314,13 +350,17 @@ export class Editor {
         let color = '#1E9AFA';
         let lineWidth = 1;
 
+        let middleCol = Math.floor(this.columns / 2);
+        let middleRow = Math.floor(this.rows / 2);
+
         this.animation = setInterval(() => {
             if (index >= path.length - 1) {
                 clearInterval(this.animation);
                 let x = path[path.length - 1].x * this.widthTiles;
                 let y: number;
                 // to show locate animation top or bottom with respecto to goal
-                if (path[0].y - path[path.length - 1].y >= 0) {
+                // if (path[0].y - path[path.length - 1].y >= 0) {
+                if (path[path.length - 1].y < middleRow) {
                     y = path[path.length - 1].y * this.heightTiles - this.heightTiles;
                 } else {
                     y = path[path.length - 1].y * this.heightTiles + (this.heightTiles * 6);
@@ -335,6 +375,7 @@ export class Editor {
                     index = 0;
                     this.drawLines(path, 'white', 5);
                     this.context.drawImage(this.stairImage, 320, 150);
+                    this.generateEditor();
                     this.walkingThePathWithLines(path);
                 }, 700);
             } else {
@@ -347,7 +388,7 @@ export class Editor {
             } else {
                 this.drawLine(path[index - 1], path[index], center, color, lineWidth, ctx);
             }
-            
+
         }, 1000 / 10);
     }
 
@@ -362,7 +403,6 @@ export class Editor {
     }
 
     correctTrajectory(prevPath: Box, nextPath: Box): boolean {
-
         // esquina superior derecha
         if (prevPath.x + 1 === nextPath.x && prevPath.y - 1 === nextPath.y) {
             return true;
@@ -470,18 +510,7 @@ export class Editor {
         let middleCol = Math.floor(this.columns / 2);
         let middleRow = Math.floor(this.rows / 2);
         let realGoal = goal;
-
-
-        // izquierda
-        if (goal.y === start.y && goal.x > start.x) {
-            goal = goal.neighbors.filter(n => n.y === goal.y && n.x < goal.x).pop() || goal;
-        }
-
-        // derecha
-        if (goal.y === start.y && goal.x < start.x) {
-            goal = goal.neighbors.filter(n => n.y === goal.y && n.x > goal.x).pop() || goal;
-        }
-
+        
         // arriba
         if (goal.y > middleRow) {
             goal = goal.neighbors.filter(n => n.x === goal.x && n.y < goal.y).pop() || goal;
@@ -490,16 +519,23 @@ export class Editor {
         // abajo
         if (goal.y < middleRow) {
             if (goal.neighbors.filter(n => n.type === 'wall' && n.y > goal.y).length > 0) {
-                alert('poner el goal arriba')
+                // alert('poner el goal arriba')
                 let possible = goal.neighbors.filter(n => n.x === goal.x && n.y < goal.y).pop() || goal;
-
                 goal = possible;
             } else {
                 let possible = goal.neighbors.filter(n => n.x === goal.x && n.y > goal.y).pop() || goal;
-                // alert("se fuer por aqui")
-
                 goal = possible;
             }
+        }
+
+        // izquierda
+        if ((goal.y === start.y && goal.x > start.x) || (goal.x === this.columns-1)) {
+            goal = goal.neighbors.filter(n => n.y === goal.y && n.x < goal.x).pop() || goal;
+        }
+
+        // derecha
+        if ((goal.x === 0) || goal.y === start.y && goal.x < start.x) {
+            goal = goal.neighbors.filter(n => n.y === goal.y && n.x > goal.x).pop() || goal;
         }
 
         gScore.set(start, 0);
@@ -509,9 +545,6 @@ export class Editor {
             const current = this.getBoxWithLowestFScore(openSet, fScore);
 
             if (current === goal) {
-                // console.log("encontrado");
-                // cameFrom.set(current, realGoal);
-                console.log("PATH:", cameFrom)
                 return this.reconstructPath(cameFrom, current, realGoal);
             }
 
