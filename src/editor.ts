@@ -111,8 +111,8 @@ export class Editor {
 
     generateEditor() {
         
-        this.stage.forEach((column, index) =>{
-            column.forEach((row, index) => {
+        this.stage.forEach((column) =>{
+            column.forEach((row) => {
                 if (this.showGuidelines) {
                     let center = 5;
                     if (row.x === Math.floor(this.columns/2)) {
@@ -350,7 +350,7 @@ export class Editor {
         let color = '#1E9AFA';
         let lineWidth = 1;
 
-        let middleCol = Math.floor(this.columns / 2);
+        // let middleCol = Math.floor(this.columns / 2);
         let middleRow = Math.floor(this.rows / 2);
 
         this.animation = setInterval(() => {
@@ -507,7 +507,7 @@ export class Editor {
         const gScore = new Map<Box, number>();
         const fScore = new Map<Box, number>(); // f(n) = g(n) + h(n)
 
-        let middleCol = Math.floor(this.columns / 2);
+        // let middleCol = Math.floor(this.columns / 2);
         let middleRow = Math.floor(this.rows / 2);
         let realGoal = goal;
         
